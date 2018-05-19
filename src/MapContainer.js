@@ -9,11 +9,11 @@ export default class MapContainer extends Component {
   // ======================
   state = {
     locations: [
-      { name: "New York County SC", location: {lat: 40.7143033, lng: -74.0036919} },
-      { name: "Queens County SC", location: {lat: 40.7046946, lng: -73.8091145} },
-      { name: "Kings County SC", location: {lat: 40.6940226, lng: -73.9890967} },
-      { name: "Richmond County SC", location: {lat: 40.6412336, lng: -74.0768597} },
-      { name: "Bronx SC", location: {lat: 40.8262388, lng: -73.9235238} }
+      { name: "Ensimag", location: {lat: 45.1931492, lng: 5.7674826999999596} },
+      { name: "Atos", location: {lat: 45.1539228, lng: 5.7207387999999355} },
+      { name: "Museum", location: {lat: 45.1949173, lng: 5.732278299999962} },
+      { name: "Stadium", location: {lat: 45.1874353, lng: 5.740127799999982} },
+      { name: "Mall", location: {lat: 45.158158, lng: 5.731906999999978} }
     ],
     query: '',
     markers: [],
@@ -47,8 +47,8 @@ export default class MapContainer extends Component {
       const node = ReactDOM.findDOMNode(mapRef)
 
       const mapConfig = Object.assign({}, {
-        center: {lat: 40.7485722, lng: -74.0068633},
-        zoom: 11,
+        center: {lat: 45.188529, lng: 5.724523999999974},
+        zoom: 12,
         mapTypeId: 'roadmap'
       })
 
@@ -68,6 +68,7 @@ export default class MapContainer extends Component {
     const {google} = this.props
     let {infowindow} = this.state
 
+    const bounds = new google.maps.LatLngBounds();
     this.state.locations.forEach( (location, ind) => {
       const marker = new google.maps.Marker({
         position: {lat: location.location.lat, lng: location.location.lng},
@@ -81,14 +82,16 @@ export default class MapContainer extends Component {
       this.setState((state) => ({
         markers: [...state.markers, marker]
       }))
+      bounds.extend(marker.position)
     })
+    this.map.fitBounds(bounds)
   }
 
   populateInfoWindow = (marker, infowindow, user) => {
     // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker !== marker) {
       infowindow.marker = marker;
-      infowindow.setContent(`<h3>${marker.title}</h3><h4>${user.name.first} ${user.name.last} lives there</h4> 
+      infowindow.setContent(`<h3>${marker.title}</h3><h4>${user.name.first} ${user.name.last} likes it</h4> 
                    <img src="${user.picture.medium}"/>`);
       infowindow.open(this.map, marker);
       // Make sure the marker property is cleared if the infowindow is closed.

@@ -17,7 +17,8 @@ export default class MapContainer extends Component {
     ],
     query: '',
     markers: [],
-    users: []
+    users: [],
+    infowindow: new this.props.google.maps.InfoWindow()
   }
 
   componentDidMount() {
@@ -27,7 +28,10 @@ export default class MapContainer extends Component {
       .then(data => {
         this.setState({users: data.results})
         this.loadMap()
+        this.onclickLocation()
       })
+
+
   }
 
  /* componentDidUpdate() {
@@ -61,7 +65,9 @@ export default class MapContainer extends Component {
 
   addMarkers = () => {
     const {users} = this.state
-    const {google} = this.props;
+    const {google} = this.props
+    let {infowindow} = this.state
+
     this.state.locations.forEach( (location, ind) => {
       const marker = new google.maps.Marker({
         position: {lat: location.location.lat, lng: location.location.lng},
@@ -69,28 +75,42 @@ export default class MapContainer extends Component {
         title: location.name
       });
 
-      // display an infowindow with some user pictures
-      const infowindow = new google.maps.InfoWindow({
-        content: `<h4>${users[ind].name.first} ${users[ind].name.last}</h4> 
-                   <img src="${users[ind].picture.medium}"/>`
+      marker.addListener('click', () => {
+        this.populateInfoWindow(marker, infowindow, users[ind]);
       });
-
-      //using a closure for i to close the infowindow if clicked an even number of times
-      marker.addListener('click', (function() {
-        let i =0;
-        return function() {
-          i++;
-          if(i%2 !== 0) {
-            infowindow.open(marker, marker);
-          }
-          else {
-            infowindow.close()
-          }
-        }
-      })());
       this.setState((state) => ({
         markers: [...state.markers, marker]
       }))
+    })
+  }
+
+  populateInfoWindow = (marker, infowindow, user) => {
+    // Check to make sure the infowindow is not already opened on this marker.
+    if (infowindow.marker !== marker) {
+      infowindow.marker = marker;
+      infowindow.setContent(`<h3>${marker.title}</h3><h4>${user.name.first} ${user.name.last} lives there</h4> 
+                   <img src="${user.picture.medium}"/>`);
+      infowindow.open(this.map, marker);
+      // Make sure the marker property is cleared if the infowindow is closed.
+      infowindow.addListener('closeclick', function() {
+        infowindow.marker = null;
+      });
+    }
+  }
+
+  onclickLocation = () => {
+    const {markers} = this.state
+    console.log('this', this)
+    // const {google} = this.props
+    const that = this
+    const {infowindow} = this.state
+    console.log(infowindow)
+    document.querySelector('.locations-list').addEventListener('click', function (e) {
+      if(e.target && e.target.nodeName === "LI") {
+        const ind = [...this.childNodes].findIndex(it => it.innerText === e.target.innerText)
+        console.log("ind", ind)
+        that.populateInfoWindow(markers[ind], infowindow, that.state.users[ind])
+      }
     })
   }
 
@@ -100,7 +120,7 @@ export default class MapContainer extends Component {
       // get the index of elements that does not start with the query
       // and use that index with markers array to setMap to null
       locations.forEach((l,i) => {
-        if(l.name.startsWith(query)) {
+        if(l.name.toLowerCase().startsWith(query.toLowerCase())) {
           markers[i].setVisible(true)
         } else {
           markers[i].setVisible(false)
@@ -114,19 +134,11 @@ export default class MapContainer extends Component {
       })
     }
 
-    document.querySelector('.location').addEventListener('click', function (e) {
-      if(e.target && e.target.nodeName == "LI") {
-        console.log(e.target.id + " was clicked");
-        // get the index of the child and
-        //new google.maps.event.trigger( marker, 'click' );
-      }
-    })
-
     return (
       <div className="container">
         <div className="text-input">
           <input role="search" type='text' value={this.state.value} onChange={this.handleValueChange}/>
-          <ul className="location">{
+          <ul className="locations-list">{
             markers.filter(m => m.getVisible()).map((m, i) =>
             (<li key={i}>{locations[i].name}</li>))
           }</ul>

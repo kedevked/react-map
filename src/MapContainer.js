@@ -115,7 +115,7 @@ export default class MapContainer extends Component {
   }
 
   render() {
-    const { locations, query, markers} = this.state
+    const { locations, query, markers, infowindow} = this.state
     if (query) {
       // get the index of elements that does not start with the query
       // and use that index with markers array to setMap to null
@@ -123,6 +123,11 @@ export default class MapContainer extends Component {
         if(l.name.toLowerCase().startsWith(query.toLowerCase())) {
           markers[i].setVisible(true)
         } else {
+          console.log('infowindow', infowindow.marker)
+          if (infowindow.marker === markers[i]){
+            // close the info window if marker removed
+            infowindow.close()
+          }
           markers[i].setVisible(false)
         }
       })

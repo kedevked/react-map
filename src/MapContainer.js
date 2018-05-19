@@ -103,16 +103,22 @@ export default class MapContainer extends Component {
 
   onclickLocation = () => {
     const {markers} = this.state
-    console.log('this', this)
-    // const {google} = this.props
     const that = this
     const {infowindow} = this.state
-    console.log(infowindow)
+
+    const displayInfowindow = (e) => {
+      const parentNode = document.querySelector('.locations-list')
+      const ind = [...parentNode.childNodes].findIndex(it => it.innerText === e.target.innerText)
+      that.populateInfoWindow(markers[ind], infowindow, that.state.users[ind])
+    }
     document.querySelector('.locations-list').addEventListener('click', function (e) {
       if(e.target && e.target.nodeName === "LI") {
-        const ind = [...this.childNodes].findIndex(it => it.innerText === e.target.innerText)
-        console.log("ind", ind)
-        that.populateInfoWindow(markers[ind], infowindow, that.state.users[ind])
+        displayInfowindow(e)
+      }
+    })
+    document.querySelector('.locations-list').addEventListener('keydown', function (e) {
+      if(e.keyCode === 13 ){
+        displayInfowindow(e)
       }
     })
   }
@@ -144,14 +150,14 @@ export default class MapContainer extends Component {
 
     return (
       <div className="container">
-        <div className="text-input">
+        <div className="sidebar text-input text-input-hidden">
           <input role="search" type='text' value={this.state.value} onChange={this.handleValueChange}/>
           <ul className="locations-list">{
             markers.filter(m => m.getVisible()).map((m, i) =>
-            (<li key={i}>{locations[i].name}</li>))
+            (<li key={i} tabIndex="0">{locations[i].name}</li>))
           }</ul>
         </div>
-        <div className="map" ref="map">
+        <div role="application" className="map" ref="map">
           loading map...
         </div>
       </div>

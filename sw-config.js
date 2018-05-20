@@ -5,7 +5,7 @@ module.exports = {
     'build/manifest.json',
     'build/static/**/!(*map*)'
   ],
-  dontCacheBustUrlsMatching: /\.\w{8}\./,
+  // dontCacheBustUrlsMatching: /\.\w{8}\./,
   swFilePath: 'build/service-worker.js'/*,
   runtimeCaching: [{
     // urlPattern: /^https:\/\/example\.com\/api/,

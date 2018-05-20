@@ -10,7 +10,7 @@
     "sw-toolbox": "^3.6.0"
   },
   "scripts": {
-    "start": "react-scripts start && sw-precache --config=sw-precache-config.js",
+    "start": "react-scripts start && sw-precache --config=sw-config.js",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"

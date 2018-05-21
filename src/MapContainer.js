@@ -107,9 +107,10 @@ export default class MapContainer extends Component {
     const {infowindow} = this.state
 
     const displayInfowindow = (e) => {
-      const parentNode = document.querySelector('.locations-list')
-      const ind = [...parentNode.childNodes].findIndex(it => it.innerText === e.target.innerText)
-      that.populateInfoWindow(markers[ind], infowindow, that.state.users[ind])
+      //const parentNode = document.querySelector('.locations-list')
+      //const ind = [...parentNode.childNodes].findIndex(it => it.innerText === e.target.innerText)
+      const markerInd = markers.findIndex(m => m.title.toLowerCase() === e.target.innerText.toLowerCase())
+      that.populateInfoWindow(markers[markerInd], infowindow, that.state.users[markerInd])
     }
     document.querySelector('.locations-list').addEventListener('click', function (e) {
       if(e.target && e.target.nodeName === "LI") {
@@ -154,7 +155,7 @@ export default class MapContainer extends Component {
           <input role="search" type='text' value={this.state.value} onChange={this.handleValueChange}/>
           <ul className="locations-list">{
             markers.filter(m => m.getVisible()).map((m, i) =>
-            (<li key={i} tabIndex="0">{locations[i].name}</li>))
+            (<li key={i} tabIndex="0">{m.title}</li>))
           }</ul>
         </div>
         <div role="application" className="map" ref="map">

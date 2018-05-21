@@ -106,8 +106,11 @@ export default class MapContainer extends Component {
       }
       marker.setIcon(highlightedIcon)
       infowindow.marker = marker;
-      infowindow.setContent(`<h3>${marker.title}</h3><h4>${user.name.first} ${user.name.last} likes it</h4> 
-                   <img src="${user.picture.medium}"/>`);
+      infowindow.setContent(`<h3>Location: <strong>${marker.title}</strong></h3>
+                             <div>Latitude: ${marker.getPosition().lat()}</div>
+                             <div>Longitude: ${marker.getPosition().lng()}</div>
+                             <h4>${user.name.first} ${user.name.last} likes it</h4> 
+                             <img src="${user.picture.medium}" alt="user living in ${marker.title}"/>`);
       infowindow.open(this.map, marker);
       // Make sure the marker property is cleared if the infowindow is closed.
       infowindow.addListener('closeclick', () => {

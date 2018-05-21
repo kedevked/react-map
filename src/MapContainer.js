@@ -210,10 +210,10 @@ export default class MapContainer extends Component {
           (<div className="container">
             <div className="sidebar text-input text-input-hidden">
               <input role="search" type='text' value={this.state.value} onChange={this.handleValueChange}/>
-              <div>
-                <ul role="group" className="locations-list">{
+         <div>
+                <ul className="locations-list">{
                   markers.filter(m => m.getVisible()).map((m, i) =>
-                    (<li role="menuitem " key={i} tabIndex="0">{m.title}</li>))
+                    (<li role="link" key={i} tabIndex="0">{m.title}</li>))
                 }</ul>
               </div>
             </div>

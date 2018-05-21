@@ -19,13 +19,21 @@ export default class MapContainer extends Component {
     markers: [],
     users: [],
     infowindow: new this.props.google.maps.InfoWindow(),
-    highlightedIcon: null
+    highlightedIcon: null,
+    error: null
   }
 
   componentDidMount() {
     const url = 'https://randomuser.me/api/?results=5'
     fetch(url)
-      .then(data => data.json())
+      .then(data => {
+        if(data.ok) {
+          return data.json()
+        } else {
+          this.setState({error: data.statusText})
+          throw new Error(data.statusText)
+        }
+      })
       .then(data => {
         this.setState({users: data.results})
         this.loadMap()
@@ -167,17 +175,20 @@ export default class MapContainer extends Component {
     }
 
     return (
-      <div className="container">
-        <div className="sidebar text-input text-input-hidden">
-          <input role="search" type='text' value={this.state.value} onChange={this.handleValueChange}/>
-          <ul className="locations-list">{
-            markers.filter(m => m.getVisible()).map((m, i) =>
-            (<li key={i} tabIndex="0">{m.title}</li>))
-          }</ul>
-        </div>
-        <div role="application" className="map" ref="map">
-          loading map...
-        </div>
+      <div>
+        {this.state.error ? (<div className="error">An error has occurred; please try later</div>):
+          (<div className="container">
+            <div className="sidebar text-input text-input-hidden">
+              <input role="search" type='text' value={this.state.value} onChange={this.handleValueChange}/>
+              <ul className="locations-list">{
+                markers.filter(m => m.getVisible()).map((m, i) =>
+                  (<li key={i} tabIndex="0">{m.title}</li>))
+              }</ul>
+            </div>
+            <div role="application" className="map" ref="map">
+              loading map...
+            </div>
+      </div>)}
       </div>
     )
   }

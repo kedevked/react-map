@@ -86,6 +86,10 @@
     display: none;
 }
 
+.error {
+    color: red;
+}
+
 @media screen and (max-width: 800px) {
     .text-input-hidden {
         display: none;

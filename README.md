@@ -11,7 +11,15 @@ for runtime caching
 
 ## API 
 
-The project uses Google Map Api and [randomUser](randomuser) Api
+The project uses [Google Map](https://developers.google.com/maps/documentation/) 
+especially the Maps and Places API
+and [randomUser](randomuser) API
+
+## Description
+
+This app displays a google Map with 5 markers. A clik on each marker display
+infos associated to that marker. A filter also allows the user to 
+display specific markers
 
 ## lauch the project
 

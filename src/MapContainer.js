@@ -18,7 +18,8 @@ export default class MapContainer extends Component {
     query: '',
     markers: [],
     users: [],
-    infowindow: new this.props.google.maps.InfoWindow()
+    infowindow: new this.props.google.maps.InfoWindow(),
+    highlightedIcon: null
   }
 
   componentDidMount() {
@@ -30,7 +31,9 @@ export default class MapContainer extends Component {
         this.loadMap()
         this.onclickLocation()
       })
-
+    // Create a "highlighted location" marker color for when the user
+    // clicks on the marker.
+    this.setState({highlightedIcon: this.makeMarkerIcon('FFFF24')})
 
   }
 
@@ -67,8 +70,8 @@ export default class MapContainer extends Component {
     const {users} = this.state
     const {google} = this.props
     let {infowindow} = this.state
-
     const bounds = new google.maps.LatLngBounds();
+
     this.state.locations.forEach( (location, ind) => {
       const marker = new google.maps.Marker({
         position: {lat: location.location.lat, lng: location.location.lng},
@@ -77,8 +80,8 @@ export default class MapContainer extends Component {
       });
 
       marker.addListener('click', () => {
-        this.populateInfoWindow(marker, infowindow, users[ind]);
-      });
+        this.populateInfoWindow(marker, infowindow, users[ind])
+      })
       this.setState((state) => ({
         markers: [...state.markers, marker]
       }))
@@ -89,14 +92,23 @@ export default class MapContainer extends Component {
 
   populateInfoWindow = (marker, infowindow, user) => {
     // Check to make sure the infowindow is not already opened on this marker.
+    const defaultIcon = marker.getIcon()
+    const {markers, highlightedIcon} = this.state
     if (infowindow.marker !== marker) {
+      // change the color of previous marker
+      if(infowindow.marker) {
+        const ind = markers.findIndex(m => m.title === infowindow.marker.title)
+        markers[ind].setIcon(defaultIcon)
+      }
+      marker.setIcon(highlightedIcon)
       infowindow.marker = marker;
       infowindow.setContent(`<h3>${marker.title}</h3><h4>${user.name.first} ${user.name.last} likes it</h4> 
                    <img src="${user.picture.medium}"/>`);
       infowindow.open(this.map, marker);
       // Make sure the marker property is cleared if the infowindow is closed.
-      infowindow.addListener('closeclick', function() {
-        infowindow.marker = null;
+      infowindow.addListener('closeclick', () => {
+        infowindow.marker = null
+        marker.setIcon(defaultIcon)
       });
     }
   }
@@ -124,16 +136,27 @@ export default class MapContainer extends Component {
     })
   }
 
+  makeMarkerIcon = (markerColor) => {
+    const {google} = this.props
+    let markerImage = new google.maps.MarkerImage(
+      'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+      '|40|_|%E2%80%A2',
+      new google.maps.Size(21, 34),
+      new google.maps.Point(0, 0),
+      new google.maps.Point(10, 34),
+      new google.maps.Size(21,34));
+    return markerImage;
+  }
+
   render() {
     const { locations, query, markers, infowindow} = this.state
     if (query) {
       // get the index of elements that does not start with the query
       // and use that index with markers array to setMap to null
       locations.forEach((l,i) => {
-        if(l.name.toLowerCase().startsWith(query.toLowerCase())) {
+        if(l.name.toLowerCase().includes(query.toLowerCase())) {
           markers[i].setVisible(true)
         } else {
-          console.log('infowindow', infowindow.marker)
           if (infowindow.marker === markers[i]){
             // close the info window if marker removed
             infowindow.close()

@@ -98,6 +98,11 @@ export default class MapContainer extends Component {
     // Check to make sure the infowindow is not already opened on this marker.
     const defaultIcon = marker.getIcon()
     const {markers, highlightedIcon} = this.state
+    const {google} = this.props
+
+    const service = new google.maps.places.PlacesService(this.map)
+    const geocoder = new google.maps.Geocoder()
+
     if (infowindow.marker !== marker) {
       // change the color of previous marker
       if(infowindow.marker) {
@@ -106,12 +111,34 @@ export default class MapContainer extends Component {
       }
       marker.setIcon(highlightedIcon)
       infowindow.marker = marker;
-      infowindow.setContent(`<h3>Location: <strong>${marker.title}</strong></h3>
+
+
+      geocoder.geocode({'location': marker.position}, function(results, status) {
+        if (status === google.maps.GeocoderStatus.OK) {
+          if (results[1]) {
+            service.getDetails({
+              placeId: results[1].place_id
+            }, (place, status) => {
+              if (status === google.maps.places.PlacesServiceStatus.OK) {
+                infowindow.setContent(`<h4>Location: <strong>${marker.title}</strong></h4>
                              <div>Latitude: ${marker.getPosition().lat()}</div>
                              <div>Longitude: ${marker.getPosition().lng()}</div>
-                             <h4>${user.name.first} ${user.name.last} likes it</h4> 
+                             <h3>User</h3>
+                             <div>${user.name.first} ${user.name.last}</div>
+                             <h4> Other details: </h4>
+                             <div>${place.name}, ${place.formatted_address}</div>
                              <img src="${user.picture.medium}" alt="user living in ${marker.title}"/>`);
-      infowindow.open(this.map, marker);
+                infowindow.open(this.map, marker);
+              }
+            });
+
+          } else {
+            window.alert('No results found');
+          }
+        } else {
+          window.alert('Geocoder failed due to: ' + status);
+        }
+      });
       // Make sure the marker property is cleared if the infowindow is closed.
       infowindow.addListener('closeclick', () => {
         infowindow.marker = null
@@ -183,10 +210,12 @@ export default class MapContainer extends Component {
           (<div className="container">
             <div className="sidebar text-input text-input-hidden">
               <input role="search" type='text' value={this.state.value} onChange={this.handleValueChange}/>
-              <ul className="locations-list">{
-                markers.filter(m => m.getVisible()).map((m, i) =>
-                  (<li key={i} tabIndex="0">{m.title}</li>))
-              }</ul>
+              <div>
+                <ul role="group" className="locations-list">{
+                  markers.filter(m => m.getVisible()).map((m, i) =>
+                    (<li role="menuitem " key={i} tabIndex="0">{m.title}</li>))
+                }</ul>
+              </div>
             </div>
             <div role="application" className="map" ref="map">
               loading map...

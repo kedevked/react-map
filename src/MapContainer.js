@@ -37,10 +37,6 @@ export default class MapContainer extends Component {
 
   }
 
- /* componentDidUpdate() {
-    this.loadMap(); // call loadMap function to load the google map
-  }
-*/
   loadMap() {
     if (this.props && this.props.google) {
       const {google} = this.props
@@ -119,8 +115,6 @@ export default class MapContainer extends Component {
     const {infowindow} = this.state
 
     const displayInfowindow = (e) => {
-      //const parentNode = document.querySelector('.locations-list')
-      //const ind = [...parentNode.childNodes].findIndex(it => it.innerText === e.target.innerText)
       const markerInd = markers.findIndex(m => m.title.toLowerCase() === e.target.innerText.toLowerCase())
       that.populateInfoWindow(markers[markerInd], infowindow, that.state.users[markerInd])
     }

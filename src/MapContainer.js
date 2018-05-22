@@ -20,7 +20,8 @@ export default class MapContainer extends Component {
     users: [],
     infowindow: new this.props.google.maps.InfoWindow(),
     highlightedIcon: null,
-    error: null
+    error: null,
+    mapError: null
   }
 
   componentDidMount() {
@@ -30,7 +31,6 @@ export default class MapContainer extends Component {
         if(data.ok) {
           return data.json()
         } else {
-          this.setState({error: data.statusText})
           throw new Error(data.statusText)
         }
       })
@@ -38,6 +38,9 @@ export default class MapContainer extends Component {
         this.setState({users: data.results})
         this.loadMap()
         this.onclickLocation()
+      })
+      .catch(err => {
+        this.setState({error: err.toString()})
       })
     // Create a "highlighted location" marker color for when the user
     // clicks on the marker.
@@ -59,8 +62,10 @@ export default class MapContainer extends Component {
         mapTypeId: 'roadmap'
       })
 
-      this.map = new maps.Map(node, mapConfig);
-      this.addMarkers();
+      this.map = new maps.Map(node, mapConfig)
+      this.addMarkers()
+    } else {
+      this.setState({mapError: "error while loading the app"})
     }
 
 
@@ -206,7 +211,11 @@ export default class MapContainer extends Component {
 
     return (
       <div>
-        {this.state.error ? (<div className="error">An error has occurred; please try later</div>):
+        {this.state.error ? (
+          <div className="error">
+            An error has occurred; please try later
+            <div className="error-description">{this.state.error}</div>
+          </div>):
           (<div className="container">
             <div className="sidebar text-input text-input-hidden">
               <input role="search" type='text' value={this.state.value} onChange={this.handleValueChange}/>
@@ -219,6 +228,7 @@ export default class MapContainer extends Component {
             </div>
             <div role="application" className="map" ref="map">
               loading map...
+              {this.state.mapError && <div className="error">{this.state.mapError}</div>}
             </div>
       </div>)}
       </div>
